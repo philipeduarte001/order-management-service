@@ -11,6 +11,9 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
+    private Long externalOrderId;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "order_id")
     private List<Product> products;
@@ -20,8 +23,8 @@ public class Order {
 
     public Order() {}
 
-    public Order(Long id, List<Product> products) {
-        this.id = id;
+    public Order(Long externalOrderId, List<Product> products) {
+        this.externalOrderId = externalOrderId;
         this.products = products;
         this.total = BigDecimal.ZERO;
         this.status = "RECEIVED";
@@ -34,6 +37,8 @@ public class Order {
     }
 
     public Long getId() { return id; }
+    public Long getExternalOrderId() { return externalOrderId; }
+    public void setExternalOrderId(Long externalOrderId) { this.externalOrderId = externalOrderId; }
     public List<Product> getProducts() { return products; }
     public BigDecimal getTotal() { return total; }
     public String getStatus() { return status; }

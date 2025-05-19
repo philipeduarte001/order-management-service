@@ -28,4 +28,9 @@ public class OrderRepositoryJpaImpl implements OrderRepository {
     public List<Order> findAll() {
         return repository.findAll();
     }
+
+    @Override
+    public Order findByExternalOrderId(Long externalOrderId) {
+        return repository.findByExternalOrderId(externalOrderId).orElse(null);
+    }
 } 

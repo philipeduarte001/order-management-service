@@ -34,6 +34,7 @@ class OrderServiceTest {
 
     @Test
     void processOrderFromA_deveProcessarPedidoComSucesso() {
+        when(orderRepository.findByExternalOrderId(1L)).thenReturn(null);
         Long externalOrderId = 1L;
         Order order = new Order(externalOrderId, Arrays.asList(
             new Product(1L, "Produto A", new BigDecimal("100.00")),
@@ -43,6 +44,43 @@ class OrderServiceTest {
         Order result = orderService.processOrderFromA(externalOrderId);
         verify(orderRepository).save(any(Order.class));
         verify(eventPublisher).publishOrderProcessed(any(Order.class));
+    }
+
+    @Test
+    void processOrderFromA_naoProcessaPedidoDuplicado() {
+        Long externalOrderId = 1L;
+        Order existingOrder = new Order(externalOrderId, Arrays.asList(
+            new Product(1L, "Produto A", new BigDecimal("100.00")),
+            new Product(2L, "Produto B", new BigDecimal("200.00"))
+        ));
+        when(orderRepository.findByExternalOrderId(externalOrderId)).thenReturn(existingOrder);
+        Order result = orderService.processOrderFromA(externalOrderId);
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(eventPublisher, never()).publishOrderProcessed(any(Order.class));
+        org.junit.jupiter.api.Assertions.assertEquals(existingOrder, result);
+    }
+
+    @Test
+    void processOrderFromB_deveProcessarPedidoComSucesso() {
+        when(orderRepository.findByExternalOrderId(2L)).thenReturn(null);
+        Long externalOrderId = 2L;
+        Order result = orderService.processOrderFromB(externalOrderId);
+        verify(orderRepository).save(any(Order.class));
+        verify(eventPublisher).publishOrderProcessed(any(Order.class));
+    }
+
+    @Test
+    void processOrderFromB_naoProcessaPedidoDuplicado() {
+        Long externalOrderId = 2L;
+        Order existingOrder = new Order(externalOrderId, Arrays.asList(
+            new Product(3L, "Produto C", new BigDecimal("150.00")),
+            new Product(4L, "Produto D", new BigDecimal("250.00"))
+        ));
+        when(orderRepository.findByExternalOrderId(externalOrderId)).thenReturn(existingOrder);
+        Order result = orderService.processOrderFromB(externalOrderId);
+        verify(orderRepository, never()).save(any(Order.class));
+        verify(eventPublisher, never()).publishOrderProcessed(any(Order.class));
+        org.junit.jupiter.api.Assertions.assertEquals(existingOrder, result);
     }
 
     @Test
@@ -57,15 +95,8 @@ class OrderServiceTest {
     }
 
     @Test
-    void processOrderFromB_deveProcessarPedidoComSucesso() {
-        Long externalOrderId = 2L;
-        Order result = orderService.processOrderFromB(externalOrderId);
-        verify(orderRepository).save(any(Order.class));
-        verify(eventPublisher).publishOrderProcessed(any(Order.class));
-    }
-
-    @Test
     void processOrderFromA_deveCalcularTotalCorretamente() {
+        when(orderRepository.findByExternalOrderId(10L)).thenReturn(null);
         Long externalOrderId = 10L;
         Order result = orderService.processOrderFromA(externalOrderId);
         BigDecimal expectedTotal = new BigDecimal("300.00");
@@ -74,6 +105,7 @@ class OrderServiceTest {
 
     @Test
     void processOrderFromB_deveCalcularTotalCorretamente() {
+        when(orderRepository.findByExternalOrderId(20L)).thenReturn(null);
         Long externalOrderId = 20L;
         Order result = orderService.processOrderFromB(externalOrderId);
         BigDecimal expectedTotal = new BigDecimal("400.00");

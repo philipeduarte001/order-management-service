@@ -19,12 +19,18 @@ public class ExternalProductAClientKafkaConsumer {
         this.orderService = orderService;
     }
 
+    static class ExternalOrderIdDTO {
+        public Long externalOrderId;
+        public Long getExternalOrderId() { return externalOrderId; }
+        public void setExternalOrderId(Long externalOrderId) { this.externalOrderId = externalOrderId; }
+    }
+
     @KafkaListener(topics = "pedidos-sistema-a", groupId = "order-service-group")
     public void consume(String message) {
         try {
             logger.info("Recebendo pedido do Sistema A: {}", message);
-            Order order = objectMapper.readValue(message, Order.class);
-            Order processedOrder = orderService.processOrderFromA(order.getId());
+            ExternalOrderIdDTO dto = objectMapper.readValue(message, ExternalOrderIdDTO.class);
+            Order processedOrder = orderService.processOrderFromA(dto.getExternalOrderId());
             logger.info("Pedido processado com sucesso: {}", processedOrder.getId());
         } catch (Exception e) {
             logger.error("Erro ao processar pedido do Sistema A: {}", message, e);

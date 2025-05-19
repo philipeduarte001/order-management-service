@@ -22,9 +22,13 @@ public class OrderService {
 
     @Transactional
     public Order processOrderFromA(Long externalOrderId) {
+        Order existing = orderRepository.findByExternalOrderId(externalOrderId);
+        if (existing != null) {
+            return existing;
+        }
         Order order = new Order(externalOrderId, List.of(
-            new Product(1L, "Produto A", new BigDecimal("100.00")),
-            new Product(2L, "Produto B", new BigDecimal("200.00"))
+            new Product(null, "Produto A", new BigDecimal("100.00")),
+            new Product(null, "Produto B", new BigDecimal("200.00"))
         ));
         
         order.calculateTotal();
@@ -38,9 +42,13 @@ public class OrderService {
 
     @Transactional
     public Order processOrderFromB(Long externalOrderId) {
+        Order existing = orderRepository.findByExternalOrderId(externalOrderId);
+        if (existing != null) {
+            return existing;
+        }
         Order order = new Order(externalOrderId, List.of(
-            new Product(3L, "Produto C", new BigDecimal("150.00")),
-            new Product(4L, "Produto D", new BigDecimal("250.00"))
+            new Product(null, "Produto C", new BigDecimal("150.00")),
+            new Product(null, "Produto D", new BigDecimal("250.00"))
         ));
         
         order.calculateTotal();
