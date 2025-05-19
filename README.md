@@ -50,7 +50,7 @@ docker-compose up -d
 - Exemplo de mensagem:
 ```json
 {
-  "id": 1
+  "externalOrderId": 1
 }
 ```
 
