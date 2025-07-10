@@ -1,23 +1,22 @@
 package com.company.orderservice.application;
 
 import com.company.orderservice.domain.model.Order;
-import com.company.orderservice.domain.model.Product;
 import com.company.orderservice.domain.ports.OrderRepository;
 import com.company.orderservice.domain.ports.OrderEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderEventPublisher eventPublisher;
+    private final ProductCreationService productCreationService;
 
-    public OrderService(OrderRepository orderRepository, OrderEventPublisher eventPublisher) {
+    public OrderService(OrderRepository orderRepository, OrderEventPublisher eventPublisher, ProductCreationService productCreationService) {
         this.orderRepository = orderRepository;
         this.eventPublisher = eventPublisher;
+        this.productCreationService = productCreationService;
     }
 
     @Transactional
@@ -26,15 +25,12 @@ public class OrderService {
         if (existing != null) {
             return existing;
         }
-        Order order = new Order(externalOrderId, List.of(
-            new Product(null, "Produto A", new BigDecimal("100.00")),
-            new Product(null, "Produto B", new BigDecimal("200.00"))
-        ));
         
+        Order order = new Order(externalOrderId, productCreationService.createProductsForSystemA());
+        order.setStatus(productCreationService.getDefaultReceivedStatus());
         order.calculateTotal();
 
         orderRepository.save(order);
-
         eventPublisher.publishOrderProcessed(order);
         
         return order;
@@ -46,15 +42,12 @@ public class OrderService {
         if (existing != null) {
             return existing;
         }
-        Order order = new Order(externalOrderId, List.of(
-            new Product(null, "Produto C", new BigDecimal("150.00")),
-            new Product(null, "Produto D", new BigDecimal("250.00"))
-        ));
         
+        Order order = new Order(externalOrderId, productCreationService.createProductsForSystemB());
+        order.setStatus(productCreationService.getDefaultReceivedStatus());
         order.calculateTotal();
 
         orderRepository.save(order);
-
         eventPublisher.publishOrderProcessed(order);
         
         return order;

@@ -19,7 +19,7 @@ public class ExternalProductBClientKafkaConsumer {
         this.orderService = orderService;
     }
 
-    @KafkaListener(topics = "pedidos-sistema-b", groupId = "order-service-group")
+    @KafkaListener(topics = "${kafka.topics.system-b}", groupId = "${kafka.consumer.group-id}")
     public void consume(String message) {
         try {
             logger.info("Recebendo pedido do Sistema B: {}", message);

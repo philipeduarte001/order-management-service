@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,6 +22,7 @@ class KafkaOrderEventPublisherTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         publisher = new KafkaOrderEventPublisher(kafkaTemplate, objectMapper);
+        ReflectionTestUtils.setField(publisher, "orderProcessedTopic", "order-processed");
     }
 
     @Test

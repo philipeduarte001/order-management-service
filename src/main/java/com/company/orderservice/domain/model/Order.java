@@ -27,7 +27,6 @@ public class Order {
         this.externalOrderId = externalOrderId;
         this.products = products;
         this.total = BigDecimal.ZERO;
-        this.status = "RECEIVED";
     }
 
     public void calculateTotal() {

@@ -21,6 +21,9 @@ public class KafkaConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
+    
+    @Value("${kafka.topics.order-processed}")
+    private String orderProcessedTopic;
 
     @Bean
     public KafkaAdmin kafkaAdmin() {
@@ -31,7 +34,7 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic orderProcessedTopic() {
-        return new NewTopic("order-processed", 1, (short) 1);
+        return new NewTopic(orderProcessedTopic, 1, (short) 1);
     }
 
     @Bean

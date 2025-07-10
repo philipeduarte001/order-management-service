@@ -23,24 +23,28 @@ class OrderServiceTest {
 
     @Mock
     private OrderEventPublisher eventPublisher;
+    
+    @Mock
+    private ProductCreationService productCreationService;
 
     private OrderService orderService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        orderService = new OrderService(orderRepository, eventPublisher);
+        orderService = new OrderService(orderRepository, eventPublisher, productCreationService);
     }
 
     @Test
     void processOrderFromA_deveProcessarPedidoComSucesso() {
         when(orderRepository.findByExternalOrderId(1L)).thenReturn(null);
-        Long externalOrderId = 1L;
-        Order order = new Order(externalOrderId, Arrays.asList(
+        when(productCreationService.createProductsForSystemA()).thenReturn(Arrays.asList(
             new Product(1L, "Produto A", new BigDecimal("100.00")),
             new Product(2L, "Produto B", new BigDecimal("200.00"))
         ));
-        order.calculateTotal();
+        when(productCreationService.getDefaultReceivedStatus()).thenReturn("RECEIVED");
+        
+        Long externalOrderId = 1L;
         Order result = orderService.processOrderFromA(externalOrderId);
         verify(orderRepository).save(any(Order.class));
         verify(eventPublisher).publishOrderProcessed(any(Order.class));
@@ -63,6 +67,12 @@ class OrderServiceTest {
     @Test
     void processOrderFromB_deveProcessarPedidoComSucesso() {
         when(orderRepository.findByExternalOrderId(2L)).thenReturn(null);
+        when(productCreationService.createProductsForSystemB()).thenReturn(Arrays.asList(
+            new Product(3L, "Produto C", new BigDecimal("150.00")),
+            new Product(4L, "Produto D", new BigDecimal("250.00"))
+        ));
+        when(productCreationService.getDefaultReceivedStatus()).thenReturn("RECEIVED");
+        
         Long externalOrderId = 2L;
         Order result = orderService.processOrderFromB(externalOrderId);
         verify(orderRepository).save(any(Order.class));
@@ -97,6 +107,12 @@ class OrderServiceTest {
     @Test
     void processOrderFromA_deveCalcularTotalCorretamente() {
         when(orderRepository.findByExternalOrderId(10L)).thenReturn(null);
+        when(productCreationService.createProductsForSystemA()).thenReturn(Arrays.asList(
+            new Product(1L, "Produto A", new BigDecimal("100.00")),
+            new Product(2L, "Produto B", new BigDecimal("200.00"))
+        ));
+        when(productCreationService.getDefaultReceivedStatus()).thenReturn("RECEIVED");
+        
         Long externalOrderId = 10L;
         Order result = orderService.processOrderFromA(externalOrderId);
         BigDecimal expectedTotal = new BigDecimal("300.00");
@@ -106,6 +122,12 @@ class OrderServiceTest {
     @Test
     void processOrderFromB_deveCalcularTotalCorretamente() {
         when(orderRepository.findByExternalOrderId(20L)).thenReturn(null);
+        when(productCreationService.createProductsForSystemB()).thenReturn(Arrays.asList(
+            new Product(3L, "Produto C", new BigDecimal("150.00")),
+            new Product(4L, "Produto D", new BigDecimal("250.00"))
+        ));
+        when(productCreationService.getDefaultReceivedStatus()).thenReturn("RECEIVED");
+        
         Long externalOrderId = 20L;
         Order result = orderService.processOrderFromB(externalOrderId);
         BigDecimal expectedTotal = new BigDecimal("400.00");
